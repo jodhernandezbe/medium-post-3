@@ -19,12 +19,3 @@ You can use the static code analyzer PyLint by executing the command:
 ```
 pylint ./*.py
 ```
-
-## Static Typing
-
-You can analyze the static type using Mypy by running:
-
-
-```
-pylint ./*.py
-```
