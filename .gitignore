@@ -1,0 +1,3 @@
+*__pycache__/
+output_data/final_result/*.crc
+.mypy_cace/

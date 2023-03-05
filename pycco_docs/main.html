@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>main.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>main.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <p>This is the main module that is used for orchestrating the data pipeline
+for the Medium post</p>
+<p>Author: Jose D. Hernandez-Betancur
+Date: 2023-03-04</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>!/usr/bin/env python
+-<em>- coding: utf-8 -</em>-</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>Importing libraries</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">cpu_count</span>
+<span class="kn">from</span> <span class="nn">prefect</span> <span class="kn">import</span> <span class="n">flow</span>
+<span class="kn">from</span> <span class="nn">pyspark</span> <span class="kn">import</span> <span class="n">SparkConf</span>
+
+<span class="kn">from</span> <span class="nn">pipeline_tasks</span> <span class="kn">import</span> <span class="p">(</span><span class="n">get_spark_session</span><span class="p">,</span>
+                            <span class="n">load_rating_data</span><span class="p">,</span>
+                            <span class="n">load_movie_data</span><span class="p">,</span>
+                            <span class="n">load_imbd_data</span><span class="p">,</span>
+                            <span class="n">average_rating</span><span class="p">,</span>
+                            <span class="n">prepocessing_data</span><span class="p">,</span>
+                            <span class="n">transform_imdb</span><span class="p">,</span>
+                            <span class="n">transform_lens</span><span class="p">,</span>
+                            <span class="n">similarity_join</span><span class="p">,</span>
+                            <span class="n">saving_results</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>Current directory</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="n">dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@flow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Medium Data Pipeline Flow&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">data_pipeline</span><span class="p">(</span><span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Function wrapped to be used as the Prefect main flow</span>
+<span class="sd">    &#39;&#39;&#39;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>CPU numbers</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">n_cpus</span> <span class="o">=</span> <span class="n">cpu_count</span><span class="p">()</span>
+    <span class="n">n_executors</span> <span class="o">=</span> <span class="n">n_cpus</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">n_cores</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">n_max_cores</span> <span class="o">=</span> <span class="n">n_executors</span> <span class="o">*</span> <span class="n">n_cores</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>Add additional spark configurations</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">conf</span> <span class="o">=</span> <span class="n">SparkConf</span><span class="p">()</span><span class="o">.</span><span class="n">setMaster</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;local[</span><span class="si">{</span><span class="n">n_cpus</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setAppName</span><span class="p">(</span><span class="s2">&quot;Medium post&quot;</span><span class="p">)</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;spark.sql.legacy.parquet.int96RebaseModeInRead&quot;</span><span class="p">,</span> <span class="s2">&quot;LEGACY&quot;</span><span class="p">)</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;spark.sql.legacy.parquet.int96RebaseModeInWrite&quot;</span><span class="p">,</span> <span class="s2">&quot;LEGACY&quot;</span><span class="p">)</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;spark.sql.legacy.parquet.datetimeRebaseModeInRead&quot;</span><span class="p">,</span> <span class="s2">&quot;LEGACY&quot;</span><span class="p">)</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;spark.sql.legacy.parquet.datetimeRebaseModeInWrite&quot;</span><span class="p">,</span> <span class="s2">&quot;LEGACY&quot;</span><span class="p">)</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;mapreduce.fileoutputcommitter.marksuccessfuljobs&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;parquet.enable.summary-metadata&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;spark.sql.broadcastTimeout&quot;</span><span class="p">,</span>  <span class="s2">&quot;3600&quot;</span><span class="p">)</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;spark.sql.autoBroadcastJoinThreshold&quot;</span><span class="p">,</span>  <span class="s2">&quot;1073741824&quot;</span><span class="p">)</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;spark.dynamicAllocation.enabled&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;spark.sql.debug.maxToStringFields&quot;</span><span class="p">,</span> <span class="s2">&quot;100&quot;</span><span class="p">)</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;spark.executor.memory&quot;</span><span class="p">,</span> <span class="s2">&quot;10g&quot;</span><span class="p">)</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;spark.driver.memory&quot;</span><span class="p">,</span> <span class="s2">&quot;10g&quot;</span><span class="p">)</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;spark.executor.cores&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_cores</span><span class="p">))</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;spark.cores.max&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_max_cores</span><span class="p">))</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;spark.storage.memoryFraction&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">)</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;spark.driver.maxResultSize&quot;</span><span class="p">,</span> <span class="s2">&quot;8g&quot;</span><span class="p">)</span>
+    <span class="n">conf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;spark.files.overwrite&quot;</span><span class="p">,</span><span class="s2">&quot;true&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>Setting up the Spark cluster</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">with</span> <span class="n">get_spark_session</span><span class="p">(</span><span class="n">conf</span><span class="o">=</span><span class="n">conf</span><span class="p">)</span> <span class="k">as</span> <span class="n">spark_session</span><span class="p">:</span>
+
+        <span class="n">movies_ddf</span> <span class="o">=</span> <span class="n">load_movie_data</span><span class="p">(</span><span class="n">spark</span><span class="o">=</span><span class="n">spark_session</span><span class="p">,</span>
+                                      <span class="n">dir_path</span><span class="o">=</span><span class="n">dir_path</span><span class="p">)</span>
+
+        <span class="n">imdb_df</span> <span class="o">=</span> <span class="n">load_imbd_data</span><span class="p">(</span><span class="n">spark</span><span class="o">=</span><span class="n">spark_session</span><span class="p">,</span>
+                                  <span class="n">dir_path</span><span class="o">=</span><span class="n">dir_path</span><span class="p">)</span>
+
+        <span class="n">ratings_ddf</span> <span class="o">=</span> <span class="n">load_rating_data</span><span class="p">(</span><span class="n">spark</span><span class="o">=</span><span class="n">spark_session</span><span class="p">,</span>
+                                  <span class="n">dir_path</span><span class="o">=</span><span class="n">dir_path</span><span class="p">)</span>
+
+        <span class="n">lens_ddf</span> <span class="o">=</span> <span class="n">average_rating</span><span class="p">(</span><span class="n">movies_ddf</span><span class="o">=</span><span class="n">movies_ddf</span><span class="p">,</span>
+                                  <span class="n">ratings_ddf</span><span class="o">=</span><span class="n">ratings_ddf</span><span class="p">)</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="n">prepocessing_data</span><span class="p">(</span><span class="n">lens_ddf</span><span class="o">=</span><span class="n">lens_ddf</span><span class="p">)</span>
+
+        <span class="n">result_lens</span> <span class="o">=</span> <span class="n">transform_lens</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+                                  <span class="n">lens_ddf</span><span class="o">=</span><span class="n">lens_ddf</span><span class="p">)</span>
+
+        <span class="n">result_imdb</span> <span class="o">=</span> <span class="n">transform_imdb</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+                                    <span class="n">imdb_df</span><span class="o">=</span><span class="n">imdb_df</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">similarity_join</span><span class="p">(</span><span class="n">result_imdb</span><span class="o">=</span><span class="n">result_imdb</span><span class="p">,</span>
+                                  <span class="n">result_lens</span><span class="o">=</span><span class="n">result_lens</span><span class="p">,</span>
+                                  <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+                                  <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="n">saving_results</span><span class="p">(</span><span class="n">result</span><span class="o">=</span><span class="n">result</span><span class="p">,</span>
+                      <span class="n">dir_path</span><span class="o">=</span><span class="n">dir_path</span><span class="p">,</span>
+                      <span class="n">n_executors</span><span class="o">=</span><span class="n">n_executors</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p>Input argument to change the flow parameter</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--threshold&#39;</span><span class="p">,</span> <span class="s1">&#39;-t&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Threshold for using with the fuzzy-logic-based distance&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+                        <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>Running the main flow</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">data_pipeline</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">threshold</span><span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

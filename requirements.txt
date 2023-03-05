@@ -1,0 +1,4 @@
+prefect[viz]==2.8.4
+pyspark==3.1.1
+pylint
+pycco

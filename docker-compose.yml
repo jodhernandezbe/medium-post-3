@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  medium_post:
+    container_name: prefect-pyspark
+    build:
+      context: .
+      dockerfile: Dockerfile
+    stdin_open: true  # docker run -i
+    tty: true # docker run -t
+    environment:
+      PYSPARK_MAJOR_PYTHON_VERSION: 3
+    volumes:
+      - .:/home/sparkuser/medium/:rw
+    network_mode: "host"
