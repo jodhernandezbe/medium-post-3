@@ -225,14 +225,20 @@ def similarity_join(result_imdb: SparkDataFrame,
     result = (result
               .withColumn('minDist', spark_min('jaccardDist').over(window_func))
               .where(col('jaccardDist') == col('minDist'))
+              .withColumn('IMDB_Title', col('datasetA.Title'))
+              .withColumn('Lens_Title', col('datasetB.Title'))
               .drop('minDist'))
-    result = (result
-    .select(col('datasetA.Title').alias('IMDB_Title'),
-            col('datasetB.Title').alias('Lens_Title'),
-            'jaccardDist')
-    .sort(col('datasetA.id')))
 
-    print(result.show(10))
+    print(result
+      .select('IMDB_Title', 'Lens_Title', 'jaccardDist')
+      .sort(col('datasetA.id'))
+      .show(5))
+
+    result = result.select('IMDB_Title', 'Lens_Title',
+                        col('datasetA.Rating').alias('IMDB_Rating'),
+                        col('datasetB.Rating').alias('Lens_Ratin'))
+
+    print(result.show(5))
 
     return result
 
