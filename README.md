@@ -1,6 +1,6 @@
 # Overview
 
-This is the GitHub repo used for the Medium post [Data orchestration using Prefect and PySpark](https://medium.com/p/7321559864f7/edit).
+This is the GitHub repo used for the Medium post [Data orchestration using Prefect and PySpark](https://medium.com/globalwork-data-driven-world/data-orchestration-using-prefect-and-pyspark-7321559864f7).
 
 # Additional info
 
